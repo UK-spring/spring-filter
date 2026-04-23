@@ -1,38 +1,57 @@
 package com.example.springfilter.controller;
 
+import com.example.springfilter.common.Const;
 import com.example.springfilter.dto.PostCreateRequestDto;
 import com.example.springfilter.dto.PostResponseDto;
 import com.example.springfilter.dto.PostUpdateRequestDto;
-import com.example.springfilter.entity.Post;
+import com.example.springfilter.service.PostService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/post")
+@RequestMapping("/posts")
+@RequiredArgsConstructor
 public class PostController {
 
+    private final PostService postService;
+
     @PostMapping
-    public PostResponseDto create(@RequestBody PostCreateRequestDto request) {
-        // 로그인 여부 확인 로직
-
-        // 생성 로직
-        Post savedPost = new Post(request.getTitle(), request.getContents());
-
-        return new PostResponseDto(savedPost.getTitle(), savedPost.getContents());
-    }
-
-    @PutMapping("/{postId}")
-    public void update(
-            @PathVariable Long postId,
-            @RequestBody PostUpdateRequestDto request
+    public ResponseEntity<PostResponseDto> create(
+            @RequestBody PostCreateRequestDto request,
+            @SessionAttribute(Const.SESSION_KEY) Long userId
     ) {
-        // 로그인 여부 확인 로직
-        // 수정 로직
+        PostResponseDto response = postService.create(request, userId);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @DeleteMapping("/{postId}")
-    public void delete(@PathVariable Long postId) {
-        // 로그인 여부 확인 로직
-        // 삭제 로직
+    @GetMapping("/{id}")
+    public ResponseEntity<PostResponseDto> findById(@PathVariable Long id) {
+        PostResponseDto response = postService.findById(id);
+
+        return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> update(
+            @PathVariable Long id,
+            @RequestBody PostUpdateRequestDto request,
+            @SessionAttribute(Const.SESSION_KEY) Long userId
+    ) {
+        postService.update(id, request, userId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(
+            @PathVariable Long id,
+            @SessionAttribute(Const.SESSION_KEY) Long userId
+    ) {
+        postService.delete(id, userId);
+
+        return ResponseEntity.ok().build();
+    }
 }

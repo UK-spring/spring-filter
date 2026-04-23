@@ -9,8 +9,11 @@ public class PostResponseDto {
 
     private final String contents;
 
-    public PostResponseDto(String title, String contents) {
+    private final String username;
+
+    public PostResponseDto(String title, String contents, String username) {
         this.title = title;
         this.contents = contents;
+        this.username = username;
     }
 }
